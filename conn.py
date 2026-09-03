@@ -33,10 +33,25 @@ with sqlite3.connect("report.db") as connection:
 
 def get_report_data():
     with sqlite3.connect("report.db") as connection:
-        with open ("books.json") as f:
-            data_1 = json.load(f)
-            for book in data_1:
-                cursor = connection.cursor()
-                cursor.execute("SELECT COUNT(*) FROM book")
-                all_books = cursor.fetchall()
-                print(all_books)
+        cursor = connection.cursor()
+        cursor.execute("SELECT COUNT(*) FROM books")
+        total_count = cursor.fetchone()[0]
+
+        cursor.execute("SELECT AVG(price) FROM books")
+        avg = cursor.fetchone()[0]
+        cursor.execute(
+            "SELECT title, price FROM books ORDER BY price DESC LIMIT 5;")
+        cost_books = cursor.fetchall()
+        cursor.execute(
+            "SELECT rating, COUNT(*) FROM books GROUP BY rating")
+        rating = cursor.fetchall()
+
+        print({
+            "total_count": total_count,
+            "average_price": avg,
+            "top_5_expensive": cost_books,
+            "by_rating": rating
+        })
+
+
+get_report_data()
