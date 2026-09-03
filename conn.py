@@ -28,7 +28,15 @@ with sqlite3.connect("report.db") as connection:
                             rating_map[book["rating_text"]], book["product_url"])
                            )
 
-    cursor.execute("SELECT COUNT(*) FROM books")
-    all_books = cursor.fetchall()
-    print(all_books)
     connection.commit()
+
+
+def get_report_data():
+    with sqlite3.connect("report.db") as connection:
+        with open ("books.json") as f:
+            data_1 = json.load(f)
+            for book in data_1:
+                cursor = connection.cursor()
+                cursor.execute("SELECT COUNT(*) FROM book")
+                all_books = cursor.fetchall()
+                print(all_books)
