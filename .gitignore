@@ -3,4 +3,4 @@ fastapi
 uvicorn
 __pycache__/
 reports/
-report.db/
+report.db
