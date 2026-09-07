@@ -6,34 +6,30 @@ import os
 os.makedirs("reports", exist_ok=True)
 
 
-with sqlite3.connect("report.db") as connection:
-    cursor = connection.cursor()
+def seed_books():
+    with sqlite3.connect("report.db") as connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            """CREATE TABLE IF NOT EXISTS books(
+                ID INTEGER PRIMARY KEY UNIQUE,
+                title TEXT,
+                price INT,
+                rating INT,
+                url TEXT
+                )"""
+        )
+        cursor.execute("DELETE FROM books")
 
-    cursor.execute(
-        """CREATE TABLE IF NOT EXISTS books(
-            ID INTEGER PRIMARY KEY UNIQUE,
-            title TEXT,
-            price INT,
-            rating INT,
-            url TEXT
-            )"""
-    )
-
-    cursor.execute(
-        "DELETE FROM books")
-
-    with open("books.json") as f:
-        data = json.load(f)
-
-        rating_map = {"One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5}
-
-        for book in data:
-            cursor.execute("INSERT INTO books(title, price, rating, url) VALUES (?, ?, ?, ?)",
-                           (book["title"], book["price_gbp"],
-                            rating_map[book["rating_text"]], book["product_url"])
-                           )
-
-    connection.commit()
+        with open("books.json") as f:
+            data = json.load(f)
+            rating_map = {"One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5}
+            for book in data:
+                cursor.execute(
+                    "INSERT INTO books(title, price, rating, url) VALUES (?, ?, ?, ?)",
+                    (book["title"], book["price_gbp"],
+                     rating_map[book["rating_text"]], book["product_url"])
+                )
+        connection.commit()
 
 
 def get_report_data():
@@ -119,7 +115,8 @@ def render_pdf(html, output_path="reports/test.pdf"):
         browser.close()
 
 
-report = get_report_data()
-my_books = get_all_books()
-builder = build_html(report, my_books)
-render_pdf(builder)
+if __name__ == "__main__":
+    report = get_report_data()
+    my_books = get_all_books()
+    builder = build_html(report, my_books)
+    render_pdf(builder)
